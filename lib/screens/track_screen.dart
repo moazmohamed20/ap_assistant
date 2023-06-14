@@ -8,7 +8,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:positioned_tap_detector_2/positioned_tap_detector_2.dart';
 
 class TrackScreen extends GetView<TrackController> {
   const TrackScreen({super.key});
