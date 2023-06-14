@@ -39,6 +39,7 @@ class TrackScreen extends GetView<TrackController> {
   Widget _locateFab() {
     return FloatingActionButton(
       onPressed: controller.locate,
+      backgroundColor: Colors.brown,
       child: const Icon(Icons.person_pin),
     );
   }

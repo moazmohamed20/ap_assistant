@@ -6,8 +6,6 @@ import 'package:flutter/widgets.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:image_picker/image_picker.dart';
 
-enum FaceDirection { left, front, right }
-
 class FaceDetectorUtils {
   static Future<Face?> detectFace(XFile imageFile) async {
     final faceDetector = FaceDetector(

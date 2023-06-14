@@ -1,8 +1,10 @@
 import 'package:ap_assistant/apis/medicines_api.dart';
 import 'package:ap_assistant/components/medicine_list_tile.dart';
+import 'package:ap_assistant/dialogs/loading_dialog.dart';
 import 'package:ap_assistant/dialogs/medicine_dialog.dart';
 import 'package:ap_assistant/models/medicine.dart';
 import 'package:ap_assistant/models/patient.dart';
+import 'package:ap_assistant/utils/modal_bottom_sheet.dart';
 import 'package:ap_assistant/utils/snackbar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -53,20 +55,19 @@ class MedicineController extends GetxController {
   MedicineController({required this.patient});
 
   void addMedicine() async {
-    Medicine? medicine = await Get.bottomSheet<Medicine>(
-      MedicineDialog(),
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25))),
-    ).then((value) {
-      Get.delete<MedicineDialogController>();
-      return value;
-    });
+    Get.lazyPut(() => MedicineDialogController()); // ToDo: Remove
+    Medicine? medicine = await ModalBottomSheet.show<Medicine>(
+      sheet: const MedicineDialog(),
+      controller: MedicineDialogController(),
+    );
     if (medicine == null) return;
 
     try {
+      Get.dialog(const LoadingDialog(), barrierDismissible: false);
       medicine = await MedicinesApi.postMedicine(medicine.copyWith(patientId: patient.id));
+      Get.back();
     } catch (e) {
+      Get.back();
       Snackbar.show(e.toString(), type: SnackType.error);
       return;
     }
@@ -77,34 +78,36 @@ class MedicineController extends GetxController {
   }
 
   void editMedicine(int index) async {
-    Medicine? editedMedicine = await Get.bottomSheet<Medicine>(
-      MedicineDialog(medicine: patient.medicines[index]),
-      backgroundColor: Colors.white,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25))),
-    ).then((value) {
-      Get.delete<MedicineDialogController>();
-      return value;
-    });
+    Get.lazyPut(() => MedicineDialogController(medicine: patient.medicines[index])); // ToDo: Remove
+    Medicine? editedMedicine = await ModalBottomSheet.show<Medicine>(
+      sheet: const MedicineDialog(),
+      controller: MedicineDialogController(medicine: patient.medicines[index]),
+    );
     if (editedMedicine == null) return;
 
     try {
+      Get.dialog(const LoadingDialog(), barrierDismissible: false);
       editedMedicine = await MedicinesApi.putMedicine(editedMedicine);
+      Get.back();
     } catch (e) {
+      Get.back();
       Snackbar.show(e.toString(), type: SnackType.error);
       return;
     }
 
-    if (editedMedicine.imageBytes != null) CachedNetworkImage.evictFromCache(editedMedicine.fullImageUrl);
+    CachedNetworkImage.evictFromCache(editedMedicine.fullImageUrl);
     patient.medicines[index] = editedMedicine;
     GetStorage().write("patient", patient);
     update();
   }
 
-  deleteMedicine(int index) {
+  void deleteMedicine(int index) async {
     try {
+      Get.dialog(const LoadingDialog(), barrierDismissible: false);
       MedicinesApi.deleteMedicine(patient.medicines[index].id);
+      Get.back();
     } catch (e) {
+      Get.back();
       Snackbar.show(e.toString(), type: SnackType.error);
       return;
     }

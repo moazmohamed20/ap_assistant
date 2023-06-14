@@ -1,46 +1,56 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:ap_assistant/apis/people_api.dart';
+
 class Person {
+  final String id;
+  final Face face;
   final String name;
   final String relation;
-  final List<String> imagesUrls;
-  final List<Uint8List?> imagesBytes;
+  final String patientId;
 
   Person({
+    required this.id,
+    required this.face,
     required this.name,
     required this.relation,
-    this.imagesUrls = const [],
-    this.imagesBytes = const [],
+    required this.patientId,
   });
 
   Person copyWith({
+    String? id,
+    Face? face,
     String? name,
     String? relation,
-    List<String>? imagesUrls,
-    List<Uint8List>? imagesBytes,
+    String? patientId,
   }) {
     return Person(
+      id: id ?? this.id,
+      face: face ?? this.face,
       name: name ?? this.name,
       relation: relation ?? this.relation,
-      imagesUrls: imagesUrls ?? this.imagesUrls,
-      imagesBytes: imagesBytes ?? this.imagesBytes,
+      patientId: patientId ?? this.patientId,
     );
   }
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
+    return {
+      'id': id,
       'name': name,
+      'face': face.toMap(),
       'relation': relation,
-      'imagesUrls': imagesUrls,
+      'patientId': patientId,
     };
   }
 
   factory Person.fromMap(Map<String, dynamic> map) {
     return Person(
+      id: map['id'],
       name: map['name'],
       relation: map['relation'],
-      imagesUrls: List<String>.from((map['imagesUrls'] as List<String>)),
+      patientId: map['patientId'],
+      face: Face.fromMap(map['face']),
     );
   }
 
@@ -48,3 +58,43 @@ class Person {
 
   factory Person.fromJson(String source) => Person.fromMap(json.decode(source));
 }
+
+class Face {
+  final String? leftUrl;
+  final String? rightUrl;
+  final String? frontUrl;
+  final Uint8List? frontBytes;
+  final Uint8List? leftBytes;
+  final Uint8List? rightBytes;
+
+  String? get fullLeftUrl => leftUrl == null ? null : Uri.http(PeopleApi.baseUrl, leftUrl!).toString();
+  String? get fullRightUrl => rightUrl == null ? null : Uri.http(PeopleApi.baseUrl, rightUrl!).toString();
+  String? get fullFrontUrl => frontUrl == null ? null : Uri.http(PeopleApi.baseUrl, frontUrl!).toString();
+
+  Face({
+    this.leftUrl,
+    this.rightUrl,
+    this.frontUrl,
+    this.leftBytes,
+    this.rightBytes,
+    this.frontBytes,
+  });
+
+  Face copyWith({String? front, String? left, String? right}) {
+    return Face(frontUrl: front ?? frontUrl, leftUrl: left ?? leftUrl, rightUrl: right ?? rightUrl);
+  }
+
+  Map<String, dynamic> toMap() {
+    return {'front': frontUrl, 'left': leftUrl, 'right': rightUrl};
+  }
+
+  factory Face.fromMap(Map<String, dynamic> map) {
+    return Face(frontUrl: map['front'], leftUrl: map['left'], rightUrl: map['right']);
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory Face.fromJson(String source) => Face.fromMap(json.decode(source) as Map<String, dynamic>);
+}
+
+enum FaceDirection { front, left, right }

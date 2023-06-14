@@ -4,6 +4,7 @@ import 'package:ap_assistant/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:vibration/vibration.dart';
 
 class SplashScreen extends GetView<SplashController> {
   const SplashScreen({super.key});
@@ -15,11 +16,11 @@ class SplashScreen extends GetView<SplashController> {
         child: TweenAnimationBuilder<double>(
           curve: Curves.bounceOut,
           onEnd: controller.onAnimationEnd,
-          duration: const Duration(seconds: 1, milliseconds: 500),
+          duration: const Duration(seconds: 1),
           tween: Tween<double>(begin: 0, end: 1),
           builder: (context, value, child) => Transform.scale(
             scale: value,
-            child: Image.asset("assets/images/logo.png", width: 100, height: 100),
+            child: Hero(tag: 'logo', child: Image.asset("assets/images/logo.png", width: 100, height: 100)),
           ),
         ),
       ),
@@ -41,6 +42,14 @@ class SplashController extends GetxController {
     }
 
     super.onInit();
+  }
+
+  @override
+  void onReady() async {
+    if (await Vibration.hasVibrator() ?? false) {
+      Vibration.vibrate(pattern: [350, 50, 300, 50, 200, 50]);
+    }
+    super.onReady();
   }
 
   void onAnimationEnd() {

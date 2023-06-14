@@ -1,6 +1,7 @@
 import 'package:ap_assistant/components/circle_image.dart';
 import 'package:ap_assistant/components/custom_list_tile.dart';
 import 'package:ap_assistant/models/medicine.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class MedicineListTile extends StatelessWidget {
@@ -15,10 +16,10 @@ class MedicineListTile extends StatelessWidget {
       onTap: onTap,
       elevation: 1,
       title: Text(medicine.name),
-      shape: const StadiumBorder(),
       padding: const EdgeInsets.fromLTRB(8, 8, 24, 8),
+      leading: CircleImage(radius: 30, image: CachedNetworkImageProvider(medicine.fullImageUrl)),
       subtitle: Text(medicine.description, style: const TextStyle(color: Colors.black54)),
-      leading: CircleImage(radius: 30, image: NetworkImage(medicine.fullImageUrl)),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.5))),
       trailing: onDelete != null ? InkResponse(onTap: onDelete, child: const Icon(Icons.delete, color: Colors.red)) : null,
     );
   }

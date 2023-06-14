@@ -15,7 +15,6 @@ class HomeScreen extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // centerTitle: true,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -33,17 +32,32 @@ class HomeScreen extends GetView<HomeController> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
+            ImageCard(
               height: 200,
-              child: ImageCard(assetPath: "assets/images/family.png", onTap: controller.openFamilyScreen),
+              elevation: 4,
+              title: "Family",
+              onTap: controller.openFamilyScreen,
+              background: "assets/images/family.png",
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              titleBackgroundColor: Colors.orange.withOpacity(0.75),
             ),
-            SizedBox(
+            ImageCard(
               height: 200,
-              child: ImageCard(assetPath: "assets/images/medicine.png", onTap: controller.openMedicinesScreen),
+              elevation: 4,
+              title: "Medicines",
+              onTap: controller.openMedicinesScreen,
+              background: "assets/images/medicine.png",
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              titleBackgroundColor: Colors.blue.withOpacity(0.75),
             ),
-            SizedBox(
+            ImageCard(
               height: 200,
-              child: ImageCard(assetPath: "assets/images/location.png", onTap: controller.openTrackScreen),
+              elevation: 4,
+              title: "Tracking",
+              onTap: controller.openTrackScreen,
+              background: "assets/images/location.png",
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              titleBackgroundColor: Colors.brown.withOpacity(0.75),
             ),
           ],
         ),
@@ -57,7 +71,7 @@ class HomeController extends GetxController {
   HomeController({required this.patient});
 
   void openFamilyScreen() {
-    Get.to(() => FamilyScreen());
+    Get.to(() => const FamilyScreen(), binding: BindingsBuilder.put(() => FamilyController(patient: patient)));
   }
 
   void openMedicinesScreen() {

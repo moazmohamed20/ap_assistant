@@ -1,7 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:ap_assistant/components/circle_image.dart';
 import 'package:ap_assistant/components/custom_list_tile.dart';
 import 'package:ap_assistant/models/person.dart';
-import 'package:ap_assistant/utils/face_detector_utils.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class PersonListTile extends StatelessWidget {
@@ -16,32 +18,34 @@ class PersonListTile extends StatelessWidget {
       onTap: onTap,
       elevation: 1,
       title: Text(person.name),
-      shape: const StadiumBorder(),
+      padding: const EdgeInsets.fromLTRB(8, 8, 24, 8),
+      leading: SizedBox(width: 120, child: _facePhotos(person.face)),
       subtitle: Text(person.relation, style: const TextStyle(color: Colors.black54)),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.5))),
       trailing: onDelete != null ? InkResponse(onTap: onDelete, child: const Icon(Icons.delete, color: Colors.red)) : null,
-      leading: SizedBox(
-        width: 100,
-        child: Stack(
-          children: [
-            Positioned(child: _circleImage(person, 0)),
-            Positioned(left: 24, child: _circleImage(person, 2)),
-            Positioned(left: 48, child: _circleImage(person, 1)),
-          ],
-        ),
-      ),
     );
   }
 
-  Widget _circleImage(Person person, int imageIndex) {
+  Widget _facePhotos(Face face) {
+    return Stack(
+      children: [
+        Positioned(child: _circlePhoto(FaceDirection.left, face.fullLeftUrl, face.leftBytes)),
+        Positioned(left: 30, child: _circlePhoto(FaceDirection.right, face.fullRightUrl, face.rightBytes)),
+        Positioned(left: 60, child: _circlePhoto(FaceDirection.front, face.fullFrontUrl, face.frontBytes)),
+      ],
+    );
+  }
+
+  Widget _circlePhoto(FaceDirection faceDirection, String? url, Uint8List? bytes) {
     return CircleImage(
-        radius: 25,
+        radius: 30,
         image: (() {
-          if (imageIndex < person.imagesBytes.length && person.imagesBytes[imageIndex] != null) {
-            return MemoryImage(person.imagesBytes[imageIndex]!);
-          } else if (imageIndex < person.imagesUrls.length) {
-            return NetworkImage(person.imagesUrls[imageIndex]);
+          if (bytes != null) {
+            return MemoryImage(bytes);
+          } else if (url != null) {
+            return CachedNetworkImageProvider(url);
           } else {
-            return AssetImage("assets/images/face_${FaceDirection.values[imageIndex].name}_placeholder.png");
+            return AssetImage("assets/images/face_${faceDirection.name}_placeholder.png");
           }
         }()) as ImageProvider);
   }

@@ -1,18 +1,20 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
 import 'package:ap_assistant/models/medicine.dart';
+import 'package:ap_assistant/models/person.dart';
 
 class Patient {
   final String id;
   final String name;
   final String email;
+  final List<Person> family;
   final List<Medicine> medicines;
 
   Patient({
     required this.id,
     required this.name,
     required this.email,
+    required this.family,
     required this.medicines,
   });
 
@@ -20,12 +22,14 @@ class Patient {
     String? id,
     String? name,
     String? email,
+    List<Person>? family,
     List<Medicine>? medicines,
   }) {
     return Patient(
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
+      family: family ?? this.family,
       medicines: medicines ?? this.medicines,
     );
   }
@@ -35,6 +39,7 @@ class Patient {
       'id': id,
       'name': name,
       'email': email,
+      'family': family.map((x) => x.toMap()).toList(),
       'medicines': medicines.map((x) => x.toMap()).toList(),
     };
   }
@@ -44,6 +49,7 @@ class Patient {
       id: map['id'],
       name: map['name'],
       email: map['email'],
+      family: map['family'] != null ? List<Person>.from((map['family'] as List).map((x) => Person.fromMap(x))) : const [],
       medicines: map['medicines'] != null ? List<Medicine>.from((map['medicines'] as List).map((x) => Medicine.fromMap(x))) : const [],
     );
   }

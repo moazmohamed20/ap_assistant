@@ -1,9 +1,11 @@
 import 'package:ap_assistant/apis/patients_api.dart';
+import 'package:ap_assistant/dialogs/loading_dialog.dart';
 import 'package:ap_assistant/models/patient.dart';
 import 'package:ap_assistant/screens/authentication/register_screen.dart';
 import 'package:ap_assistant/screens/home_screen.dart';
 import 'package:ap_assistant/theme.dart';
 import 'package:ap_assistant/utils/snackbar.dart';
+import 'package:ap_assistant/utils/validators.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -19,7 +21,7 @@ class LoginScreen extends GetView<LoginController> {
           padding: const EdgeInsets.all(16),
           physics: const BouncingScrollPhysics(),
           children: [
-            Image.asset("assets/images/family.png"),
+            Hero(tag: 'logo', child: Image.asset("assets/images/logo.png", height: 200)),
             const SizedBox(height: 32),
             Form(key: controller.formKey, child: _formFields()),
             const SizedBox(height: 16),
@@ -37,7 +39,7 @@ class LoginScreen extends GetView<LoginController> {
       children: [
         TextFormField(
           textInputAction: TextInputAction.next,
-          validator: controller.emailValidator,
+          validator: Validators.emailValidator,
           keyboardType: TextInputType.emailAddress,
           controller: controller.emailController,
           decoration: const InputDecoration(labelText: "Email", prefixIcon: Icon(Icons.email)),
@@ -47,7 +49,7 @@ class LoginScreen extends GetView<LoginController> {
           obscureText: true,
           textInputAction: TextInputAction.done,
           keyboardType: TextInputType.visiblePassword,
-          validator: controller.passwordValidator,
+          validator: Validators.passwordValidator,
           controller: controller.passwordController,
           decoration: const InputDecoration(labelText: "Password", prefixIcon: Icon(Icons.lock)),
         ),
@@ -82,31 +84,6 @@ class LoginController extends GetxController {
     super.onInit();
   }
 
-  String? emailValidator(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return "This Field Is Required";
-    }
-    value = value.trim();
-
-    if (!RegExp(r"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$").hasMatch(value)) {
-      return "Invalid Email";
-    }
-
-    return null;
-  }
-
-  String? passwordValidator(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return "This Field Is Required";
-    }
-
-    if (!RegExp(r"^.{8,}$").hasMatch(value)) {
-      return "The Password Must Be 8 Characters At Least";
-    }
-
-    return null;
-  }
-
   void register() {
     Get.off(() => const RegisterScreen(), binding: BindingsBuilder.put(() => RegisterController()));
   }
@@ -121,11 +98,16 @@ class LoginController extends GetxController {
       password: passwordController.text,
     );
     try {
+      Get.dialog(const LoadingDialog(), barrierDismissible: false);
       patient = await PatientsApi.login(request);
+      Get.back();
     } catch (e) {
+      Get.back();
       Snackbar.show(e.toString(), type: SnackType.error);
       return;
     }
+
+    Snackbar.show("Logged In Successfully", type: SnackType.success);
 
     GetStorage().write("patient", patient);
     Get.put<Patient>(patient, permanent: true);

@@ -1,66 +1,89 @@
 import 'package:ap_assistant/components/circle_image.dart';
+import 'package:ap_assistant/dialogs/bottom_sheet_dialog.dart';
 import 'package:ap_assistant/models/person.dart';
-import 'package:ap_assistant/theme.dart';
 import 'package:ap_assistant/utils/face_detector_utils.dart';
+import 'package:ap_assistant/utils/guid_generator.dart';
 import 'package:ap_assistant/utils/snackbar.dart';
+import 'package:ap_assistant/utils/validators.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
-class PersonDialog extends StatelessWidget {
-  final Person? person;
-  late final PersonDialogController controller;
-  PersonDialog({super.key, this.person}) : controller = Get.put(PersonDialogController(person: person));
+class PersonDialog extends GetView<PersonDialogController> {
+  const PersonDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _titleWidget(),
-        _contentWidget(),
-        _actionWidgets(),
+    return BottomSheetDialog(
+      title: "Person",
+      body: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly, // ToDo
+            children: [_faceLeftPhoto(), _faceFrontPhoto(), _faceRightPhoto()],
+          ),
+          const SizedBox(height: 24),
+          Form(key: controller.formKey, child: _formFields()),
+        ],
+      ),
+      actions: [
+        TextButton(onPressed: controller.cancel, child: const Text("Cancel")),
+        TextButton(onPressed: controller.save, child: const Text("Save")),
       ],
     );
   }
 
-  Widget _titleWidget() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 24, top: 24, right: 24, bottom: 0),
-      child: Text("Person", style: appThemeData.textTheme.titleLarge!),
-    );
-  }
-
-  Widget _contentWidget() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 24, top: 16, right: 24, bottom: 24),
-      child: Column(children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [_circleImage(FaceDirection.left), _circleImage(FaceDirection.front), _circleImage(FaceDirection.right)],
-        ),
-        const SizedBox(height: 24),
-        Form(key: controller.formKey, child: _formFields()),
-      ]),
-    );
-  }
-
-  Widget _circleImage(FaceDirection faceDirection) {
+  Widget _faceLeftPhoto() {
     return GetBuilder<PersonDialogController>(builder: (controller) {
       return CircleImage(
-        radius: 50,
-        onTap: () => controller.pickFacePhoto(faceDirection),
+        radius: 40,
+        onTap: () => controller.pickFacePhoto(FaceDirection.left),
         image: (() {
-          if (controller.facesImagesBytes[faceDirection.index] != null) {
-            return MemoryImage(controller.facesImagesBytes[faceDirection.index]!);
-          } else if (person?.imagesBytes[faceDirection.index] != null) {
-            return MemoryImage(person!.imagesBytes[faceDirection.index]!);
-          } else if (person?.imagesUrls[faceDirection.index] != null) {
-            return NetworkImage(person!.imagesUrls[faceDirection.index]);
+          if (controller.facesLeftBytes != null) {
+            return MemoryImage(controller.facesLeftBytes!);
+          } else if (controller.person?.face.fullLeftUrl != null) {
+            return CachedNetworkImageProvider(controller.person!.face.fullLeftUrl!);
           } else {
-            return AssetImage("assets/images/face_${faceDirection.name}_placeholder.png");
+            return const AssetImage("assets/images/face_left_placeholder.png");
+          }
+        }()) as ImageProvider,
+      );
+    });
+  }
+
+  Widget _faceFrontPhoto() {
+    return GetBuilder<PersonDialogController>(builder: (controller) {
+      return CircleImage(
+        radius: 60,
+        onTap: () => controller.pickFacePhoto(FaceDirection.front),
+        image: (() {
+          if (controller.facesFrontBytes != null) {
+            return MemoryImage(controller.facesFrontBytes!);
+          } else if (controller.person?.face.fullFrontUrl != null) {
+            return CachedNetworkImageProvider(controller.person!.face.fullFrontUrl!);
+          } else {
+            return const AssetImage("assets/images/face_front_placeholder.png");
+          }
+        }()) as ImageProvider,
+      );
+    });
+  }
+
+  Widget _faceRightPhoto() {
+    return GetBuilder<PersonDialogController>(builder: (controller) {
+      return CircleImage(
+        radius: 40,
+        onTap: () => controller.pickFacePhoto(FaceDirection.right),
+        image: (() {
+          if (controller.facesRightBytes != null) {
+            return MemoryImage(controller.facesRightBytes!);
+          } else if (controller.person?.face.fullRightUrl != null) {
+            return CachedNetworkImageProvider(controller.person!.face.fullRightUrl!);
+          } else {
+            return const AssetImage("assets/images/face_right_placeholder.png");
           }
         }()) as ImageProvider,
       );
@@ -73,32 +96,16 @@ class PersonDialog extends StatelessWidget {
         TextFormField(
           controller: controller.nameController,
           textInputAction: TextInputAction.next,
-          validator: controller.requiredValidator,
+          validator: Validators.requiredValidator,
           decoration: const InputDecoration(labelText: "Name", prefixIcon: Icon(Icons.person), hintText: "i.e. John Nommensen"),
         ),
         const SizedBox(height: 8),
         TextFormField(
-          validator: controller.requiredValidator,
+          validator: Validators.requiredValidator,
           controller: controller.relationController,
           decoration: const InputDecoration(labelText: "Relation", prefixIcon: Icon(Icons.family_restroom), hintText: "i.e. Son"),
         ),
       ],
-    );
-  }
-
-  Widget _actionWidgets() {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: OverflowBar(
-        spacing: 8,
-        alignment: MainAxisAlignment.end,
-        overflowDirection: VerticalDirection.down,
-        overflowAlignment: OverflowBarAlignment.end,
-        children: [
-          TextButton(onPressed: controller.cancel, child: const Text("Cancel")),
-          TextButton(onPressed: controller.save, child: const Text("Save")),
-        ],
-      ),
     );
   }
 }
@@ -107,25 +114,22 @@ class PersonDialogController extends GetxController {
   final Person? person;
   PersonDialogController({this.person});
 
+  late Uint8List? facesLeftBytes;
+  late Uint8List? facesRightBytes;
+  late Uint8List? facesFrontBytes;
   late final GlobalKey<FormState> formKey;
-  late final List<Uint8List?> facesImagesBytes;
   late final TextEditingController nameController;
   late final TextEditingController relationController;
 
   @override
   void onInit() {
     formKey = GlobalKey<FormState>();
+    facesLeftBytes = person?.face.leftBytes;
+    facesRightBytes = person?.face.rightBytes;
+    facesFrontBytes = person?.face.frontBytes;
     nameController = TextEditingController(text: person?.name);
     relationController = TextEditingController(text: person?.relation);
-    facesImagesBytes = person != null ? person!.imagesBytes : List<Uint8List?>.filled(FaceDirection.values.length, null);
     super.onInit();
-  }
-
-  String? requiredValidator(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return "This Field Is Required";
-    }
-    return null;
   }
 
   void pickFacePhoto(FaceDirection faceDirection) async {
@@ -149,7 +153,16 @@ class PersonDialogController extends GetxController {
       } else {
         // 3) Read The Photo As Bytes (To Be Manipulated)
         final imageBytes = await imageFile.readAsBytes();
-        facesImagesBytes[faceDirection.index] = await FaceDetectorUtils.cropFaceAsync(imageBytes, face, 512);
+        final croppedImageBytes = await FaceDetectorUtils.cropFaceAsync(imageBytes, face, 512);
+
+        if (faceDirection == FaceDirection.left) {
+          facesLeftBytes = croppedImageBytes;
+        } else if (faceDirection == FaceDirection.right) {
+          facesRightBytes = croppedImageBytes;
+        } else if (faceDirection == FaceDirection.front) {
+          facesFrontBytes = croppedImageBytes;
+        }
+
         update();
       }
     }
@@ -162,7 +175,7 @@ class PersonDialogController extends GetxController {
   void save() {
     Get.focusScope?.unfocus();
 
-    if (facesImagesBytes.contains(null) && person == null) {
+    if (facesFrontBytes == null && person == null) {
       Snackbar.show("The Person Photos are Required", type: SnackType.error);
       return;
     }
@@ -170,9 +183,18 @@ class PersonDialogController extends GetxController {
     if (!formKey.currentState!.validate()) return;
 
     final result = Person(
-      imagesBytes: facesImagesBytes,
       name: nameController.text.trim(),
+      patientId: person?.patientId ?? "",
       relation: relationController.text.trim(),
+      id: person?.id ?? GUIDGenerator.generate(),
+      face: Face(
+        leftBytes: facesLeftBytes,
+        rightBytes: facesRightBytes,
+        frontBytes: facesFrontBytes,
+        leftUrl: person?.face.leftUrl,
+        rightUrl: person?.face.rightUrl,
+        frontUrl: person?.face.frontUrl,
+      ),
     );
     Get.back(result: result);
   }

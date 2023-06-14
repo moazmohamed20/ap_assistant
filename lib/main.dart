@@ -25,6 +25,7 @@ class APAssistantApp extends StatelessWidget {
       home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
       defaultTransition: Transition.cupertino,
+      transitionDuration: const Duration(seconds: 1),
       initialBinding: BindingsBuilder.put(() => SplashController()),
     );
   }

@@ -29,7 +29,7 @@ class MedicinesApi {
       medicine = medicine.copyWith(imageUrl: imageUrl);
     }
 
-    Uri uri = Uri.http(baseUrl, "/api/Medicines/${medicine.id}");
+    Uri uri = Uri.http(baseUrl, "/api/Medicines");
 
     final response = await http.put(
       uri,
