@@ -55,8 +55,7 @@ class MedicineController extends GetxController {
   MedicineController({required this.patient});
 
   void addMedicine() async {
-    Get.lazyPut(() => MedicineDialogController()); // ToDo: Remove
-    Medicine? medicine = await ModalBottomSheet.show<Medicine>(
+    Medicine? medicine = await ModalBottomSheet.show(
       sheet: const MedicineDialog(),
       controller: MedicineDialogController(),
     );
@@ -78,8 +77,7 @@ class MedicineController extends GetxController {
   }
 
   void editMedicine(int index) async {
-    Get.lazyPut(() => MedicineDialogController(medicine: patient.medicines[index])); // ToDo: Remove
-    Medicine? editedMedicine = await ModalBottomSheet.show<Medicine>(
+    Medicine? editedMedicine = await ModalBottomSheet.show(
       sheet: const MedicineDialog(),
       controller: MedicineDialogController(medicine: patient.medicines[index]),
     );

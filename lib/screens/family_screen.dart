@@ -55,8 +55,7 @@ class FamilyController extends GetxController {
   FamilyController({required this.patient});
 
   void addPerson() async {
-    Get.lazyPut(() => PersonDialogController()); // ToDo: Remove
-    Person? person = await ModalBottomSheet.show<Person>(
+    Person? person = await ModalBottomSheet.show(
       sheet: const PersonDialog(),
       controller: PersonDialogController(),
     );
@@ -73,12 +72,12 @@ class FamilyController extends GetxController {
     }
 
     patient.family.add(person);
+    GetStorage().write("patient", patient);
     update();
   }
 
   void editPerson(int index) async {
-    Get.lazyPut(() => PersonDialogController(person: patient.family[index])); // ToDo: Remove
-    Person? editedPerson = await ModalBottomSheet.show<Person>(
+    Person? editedPerson = await ModalBottomSheet.show(
       sheet: const PersonDialog(),
       controller: PersonDialogController(person: patient.family[index]),
     );
@@ -98,6 +97,7 @@ class FamilyController extends GetxController {
     CachedNetworkImage.evictFromCache(editedPerson.face.fullRightUrl ?? "");
     CachedNetworkImage.evictFromCache(editedPerson.face.fullFrontUrl ?? "");
     patient.family[index] = editedPerson;
+    GetStorage().write("patient", patient);
     update();
   }
 
