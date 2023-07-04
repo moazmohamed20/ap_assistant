@@ -2,7 +2,7 @@ import 'package:ap_assistant/models/medicine.dart';
 import 'package:http/http.dart' as http;
 
 class MedicinesApi {
-  static const String baseUrl = "apassistant-001-site1.atempurl.com";
+  static const String baseUrl = "alzheimers-001-site1.atempurl.com";
 
   static Future<Medicine> postMedicine(Medicine medicine) async {
     final imageUrl = await MedicinesApi.putImage(medicine.imageBytes!, medicine.id);

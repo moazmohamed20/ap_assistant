@@ -2,7 +2,7 @@ import 'package:ap_assistant/models/location.dart';
 import 'package:http/http.dart' as http;
 
 class LocationsApi {
-  static const String baseUrl = "apassistant-001-site1.atempurl.com";
+  static const String baseUrl = "alzheimers-001-site1.atempurl.com";
 
   static Future<Location?> getLocationOf(String id) async {
     Uri uri = Uri.http(baseUrl, "/api/Locations/$id");

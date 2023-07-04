@@ -2,7 +2,7 @@ import 'package:ap_assistant/models/person.dart';
 import 'package:http/http.dart' as http;
 
 class PeopleApi {
-  static const String baseUrl = "apassistant-001-site1.atempurl.com";
+  static const String baseUrl = "alzheimers-001-site1.atempurl.com";
 
   static Future<Person> postPerson(Person person) async {
     String? frontUrl, leftUrl, rightUrl;
